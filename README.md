@@ -59,3 +59,5 @@ OR using NoVNC for GUI:
 /share/powder/runvnc.sh
 ```
 
+#### Demo
+https://youtu.be/SxJuoe3GOcg
