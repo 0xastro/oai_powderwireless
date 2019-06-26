@@ -1,0 +1,28 @@
+<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jacks="http://www.protogeni.net/resources/rspec/ext/jacks/1" xmlns:client="http://www.protogeni.net/resources/rspec/ext/client/1" xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" xmlns="http://www.geni.net/resources/rspec/3" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/request.xsd" type="request">
+  <rspec_tour xmlns="http://www.protogeni.net/resources/rspec/ext/apt-tour/1">
+    <description type="markdown">
+A single compute node running GNU Radio for simulated RF transmissions
+(i.e., without SDR hardware).
+</description>
+  </rspec_tour>
+  <node client_id="node0" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm">
+    <sliver_type name="raw">
+      <disk_image name="urn:publicid:IDN+emulab.net+image+PowderTeam:update-nr-image"/>
+    </sliver_type>
+    <hardware_type name="d430"/>
+    <interface client_id="node0:if0"/>
+    <emulab:blockstore name="bs0" mountpoint="/mytempdata" class="local" size="10GB" placement="any"/>
+  </node>
+  <node client_id="node1" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm">
+    <sliver_type name="raw">
+      <disk_image name="urn:publicid:IDN+emulab.net+image+PowderTeam:update-nr-image"/>
+    </sliver_type>
+    <hardware_type name="d430"/>
+    <interface client_id="node1:if0"/>
+    <emulab:blockstore name="bs1" mountpoint="/mytempdata" class="local" size="10GB" placement="any"/>
+  </node>
+  <link client_id="link">
+    <interface_ref client_id="node0:if0"/>
+    <interface_ref client_id="node1:if0"/>
+  </link>
+</rspec>
