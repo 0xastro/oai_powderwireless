@@ -1,0 +1,85 @@
+<rspec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jacks="http://www.protogeni.net/resources/rspec/ext/jacks/1" xmlns:client="http://www.protogeni.net/resources/rspec/ext/client/1" xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" xmlns="http://www.geni.net/resources/rspec/3" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/request.xsd" type="request">
+  <rspec_tour xmlns="http://www.protogeni.net/resources/rspec/ext/apt-tour/1">
+    <description type="markdown">
+
+This profile allocates hardware resources for deploying an OAI eNB and UE in
+**noS1** mode (no core network) in a controlled RF environment on the POWDER
+platform. The inlcuded scripts automate node setup, building the OAI binaries,
+and starting the nework. The steps followed in these scripts are largely based
+on
+[this](https://gitlab.eurecom.fr/oai/openairinterface5g/wikis/HowToConnectOAIENBWithOAIUEWithoutS1Interface)
+tutorial.
+
+The following nodes will be deployed with the TX/RX and RX2 ports on the B210s
+connected via an attenuator matrix:
+
+* Intel NUC5300/B210 w/ OAI UE (`rue1`)
+* Intel NUC5300/B210 w/ OAI eNB (`enb1`)
+
+</description>
+    <instructions type="markdown">
+
+#### Preliminary setup after the experiment becomes ready
+
+After the nodes boot for the first time, do the following on `rue1` and `enb`:
+
+```
+cd /local/repository
+./setup.sh
+./build.sh
+```
+
+This will install the necessary software and configuration files on each node.
+It may take several minutes. The script will exit on error; make sure it
+completes on both nodes before moving on. These changes will persist after
+reboot.
+
+#### Starting the end-to-end network
+
+After the preliminary setup has completed without error, do the following, first
+on `enb1`, and after a few moments on `rue1` (the order is important here):
+
+```
+cd /local/repository
+./start.sh
+```
+
+After both nodes start, the `enb1` will have a tunnel interface `oaitun_enb`
+with IP address `10.0.1.1`, and `rue1` (if it has succussfully synchronized with
+`enb1`) will have a tunnel interface `oaitun_ue1` with IP address `10.0.1.2`.
+You can test the link using these IP addresses.
+
+</instructions>
+  </rspec_tour>
+  <node client_id="enb1" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm">
+    <sliver_type name="raw">
+      <disk_image name="urn:publicid:IDN+emulab.net+image+PowderProfiles:ubuntu1804lowlatency:1"/>
+    </sliver_type>
+    <hardware_type name="nuc5300"/>
+    <interface client_id="enb1:rue1_rf"/>
+    <interface client_id="enb1:if0"/>
+    <emulab:fd name="rf-controlled" weight="1"/>
+  <services><execute shell="/bin/sh" command="cd /local &amp;&amp; sudo chmod 777 . &amp;&amp; umask 002 &amp;&amp; sudo rm -rf repository &amp;&amp; git clone -n 'https://gitlab.flux.utah.edu/dmaas/oai-nos1-wired' repository &amp;&amp; cd repository &amp;&amp; git config --add core.sharedRepository group &amp;&amp; git checkout 1156ab7d1bbf07d62d1d4bf3c2e5f1340a64f474 &amp;&amp; sudo chown -R astro7x . &amp;&amp; git remote set-url --push origin 'git@gitlab.flux.utah.edu:dmaas/oai-nos1-wired'"/></services></node>
+  <node client_id="rue1" exclusive="true" component_manager_id="urn:publicid:IDN+emulab.net+authority+cm">
+    <sliver_type name="raw">
+      <disk_image name="urn:publicid:IDN+emulab.net+image+PowderProfiles:ubuntu1804lowlatency:1"/>
+    </sliver_type>
+    <hardware_type name="nuc5300"/>
+    <interface client_id="rue1:enb1_rf"/>
+    <interface client_id="rue1:if0"/>
+    <emulab:fd name="rf-controlled" weight="1"/>
+  <services><execute shell="/bin/sh" command="cd /local &amp;&amp; sudo chmod 777 . &amp;&amp; umask 002 &amp;&amp; sudo rm -rf repository &amp;&amp; git clone -n 'https://gitlab.flux.utah.edu/dmaas/oai-nos1-wired' repository &amp;&amp; cd repository &amp;&amp; git config --add core.sharedRepository group &amp;&amp; git checkout 1156ab7d1bbf07d62d1d4bf3c2e5f1340a64f474 &amp;&amp; sudo chown -R astro7x . &amp;&amp; git remote set-url --push origin 'git@gitlab.flux.utah.edu:dmaas/oai-nos1-wired'"/></services></node>
+  <link client_id="rflink" protocol="P2PLTE">
+    <interface_ref client_id="enb1:rue1_rf"/>
+    <interface_ref client_id="rue1:enb1_rf"/>
+    <property source_id="rue1:enb1_rf" dest_id="enb1:rue1_rf" capacity="10000"/>
+    <property source_id="enb1:rue1_rf" dest_id="rue1:enb1_rf" capacity="10000"/>
+  <component_manager name="urn:publicid:IDN+emulab.net+authority+cm"/></link>
+  <link client_id="lan">
+    <interface_ref client_id="rue1:if0"/>
+    <interface_ref client_id="enb1:if0"/>
+    <emulab:vlan_tagging enabled="true"/>
+    <emulab:best_effort enabled="true"/>
+    <emulab:link_multiplexing enabled="true"/>
+  <component_manager name="urn:publicid:IDN+emulab.net+authority+cm"/></link>
+<emulab:repository type="git" url="https://gitlab.flux.utah.edu/dmaas/oai-nos1-wired" commit="1156ab7d1bbf07d62d1d4bf3c2e5f1340a64f474" command="cd /local &amp;&amp; sudo chmod 777 . &amp;&amp; umask 002 &amp;&amp; sudo rm -rf repository &amp;&amp; git clone -n 'https://gitlab.flux.utah.edu/dmaas/oai-nos1-wired' repository &amp;&amp; cd repository &amp;&amp; git config --add core.sharedRepository group &amp;&amp; git checkout 1156ab7d1bbf07d62d1d4bf3c2e5f1340a64f474 &amp;&amp; sudo chown -R astro7x . &amp;&amp; git remote set-url --push origin 'git@gitlab.flux.utah.edu:dmaas/oai-nos1-wired'"/></rspec>
